@@ -2,11 +2,13 @@ import { NaverMap, Marker, useNavermaps, InfoWindow } from "react-naver-maps";
 import React, { useState, useEffect } from "react";
 import CarMarker from "../assets/icon/CarMarker.png";
 import TaxiMarker from "../assets/icon/TaxiMarker_ver2.png";
-import UserMarker from "../assets/icon/UserMarker.png"
+import UserMarker from "../assets/icon/UserMarker.png";
 import CarpoolWritingComponent from "./CarpoolWritingComponent";
 import TaxiWritingComponent from "./TaxiWritingComponent";
+import CarpoolUpdateCom from "./CarpoolUpdate";
+import TaxiUpdateCom from "./TaxiUpdate";
 import styled from "styled-components";
-import { showCarpoolState, showTaxiState, CarpoolWritingState, TaxiWritingState } from "../atoms";
+import { showCarpoolState, showTaxiState, CarpoolWritingState, TaxiWritingState, CarpoolUpdateState, TaxiUpdateState } from "../atoms";
 import { useRecoilValue, useRecoilState } from "recoil";
 
 const MapComponent = ({ CarpoolMarkerData, TaxiMarkerData }) => {
@@ -16,8 +18,11 @@ const MapComponent = ({ CarpoolMarkerData, TaxiMarkerData }) => {
     const [infowindow, setInfoWindow] = useState(null);
     const [CarpoolWriting, setCarpoolWriting] = useRecoilState(CarpoolWritingState);
     const [TaxiWriting, setTaxiWriting] = useRecoilState(TaxiWritingState);
+    const [CarpoolUpdate, setCarpoolUpdate] = useRecoilState(CarpoolUpdateState);
+    const [TaxiUpdate, setTaxiUpdate] = useRecoilState(TaxiUpdateState);
     const showCarpool = useRecoilValue(showCarpoolState);
     const showTaxi = useRecoilValue(showTaxiState);
+    
 
     function onSuccessGeolocation(position) {
         if (!map || !infowindow) return;
@@ -27,18 +32,18 @@ const MapComponent = ({ CarpoolMarkerData, TaxiMarkerData }) => {
         map.setZoom(16);
 
         const userMarker = new navermaps.Marker({
-          position: location,
-          map: map,
-          icon: {
-            url: UserMarker,
-            size: new navermaps.Size(15, 15),
-            scaledSize: new navermaps.Size(15, 15),
-            origin: new navermaps.Point(0, 0),
-            anchor: new navermaps.Point(20, 20),
-          },
+            position: location,
+            map: map,
+            icon: {
+                url: UserMarker,
+                size: new navermaps.Size(15, 15),
+                scaledSize: new navermaps.Size(15, 15),
+                origin: new navermaps.Point(0, 0),
+                anchor: new navermaps.Point(20, 20),
+            },
         });
 
-        infowindow.close(); 
+        infowindow.close();
         console.log("Coordinates: " + location.toString());
     }
 
@@ -61,12 +66,12 @@ const MapComponent = ({ CarpoolMarkerData, TaxiMarkerData }) => {
     }
 
     function handleMarkerClick(marker) {
-      if (!map) return;
-  
-      const location = new navermaps.LatLng(marker.latitude, marker.longitude);
-      
-      map.setZoom(16);
-      map.panTo(location); //화면 부드럽게 이동
+        if (!map) return;
+
+        const location = new navermaps.LatLng(marker.latitude, marker.longitude);
+
+        map.setZoom(16);
+        map.panTo(location); //화면 부드럽게 이동
     }
 
     useEffect(() => {
@@ -84,94 +89,93 @@ const MapComponent = ({ CarpoolMarkerData, TaxiMarkerData }) => {
     }, [map, infowindow]);
 
     const handleCarpoolButtonClick = () => {
-      setCarpoolWriting(true);
-      setTaxiWriting(false);
+        setCarpoolWriting(true);
+        setTaxiWriting(false);
+        setCarpoolUpdate(false);
+        setTaxiUpdate(false);
     };
-  
+
     const handleTaxiButtonClick = () => {
-      setCarpoolWriting(false);
-      setTaxiWriting(true);
+        setCarpoolWriting(false);
+        setTaxiWriting(true);
+        setCarpoolUpdate(false);
+        setTaxiUpdate(false);
     };
-  
+
     return (
-      <>
-      <Container>
-        {showCarpool && (
-          <CarpoolButton onClick={handleCarpoolButtonClick}>카풀 글쓰기</CarpoolButton>
-        )}
-        {showTaxi && <TaxiButton onClick={handleTaxiButtonClick}>택시 글쓰기</TaxiButton>}
-      </Container>
-      <NaverMap
-        defaultCenter={new navermaps.LatLng(36.7115, 128.0134)}
-        defaultZoom={7}
-        defaultMapTypeId={navermaps.MapTypeId.NORMAL}
-        ref={setMap}
-      >
-        {CarpoolMarkerData.map((marker, index) => (
-          <Marker
-            key={index}
-            position={{ lat: marker.latitude, lng: marker.longitude }}
-            title={marker.name}
-            icon={{
-              url: CarMarker,
-              size: new navermaps.Size(45, 45),
-              scaledSize: new navermaps.Size(45, 45),
-              origin: new navermaps.Point(0, 0),
-              anchor: new navermaps.Point(20, 20),
-            }}
-            onClick={() => handleMarkerClick(marker)}
-          />
-        ))}
-        {TaxiMarkerData.map((marker, index) => (
-          <Marker
-            key={index}
-            position={{ lat: marker.latitude, lng: marker.longitude }}
-            title={marker.name}
-            icon={{
-              url: TaxiMarker,
-              size: new navermaps.Size(45, 45),
-              scaledSize: new navermaps.Size(45, 45),
-              origin: new navermaps.Point(0, 0),
-              anchor: new navermaps.Point(20, 20),
-            }}
-            onClick={() => handleMarkerClick(marker)}
-          />
-        ))}
-        <InfoWindow ref={setInfoWindow} />
-      </NaverMap>
-      {CarpoolWriting && <CarpoolWritingComponent />}
-      {TaxiWriting && <TaxiWritingComponent />}
-    </>
+        <>
+            <Container>
+                {showCarpool && <CarpoolButton onClick={handleCarpoolButtonClick}>카풀 글쓰기</CarpoolButton>}
+                {showTaxi && <TaxiButton onClick={handleTaxiButtonClick}>택시 글쓰기</TaxiButton>}
+            </Container>
+            <NaverMap defaultCenter={new navermaps.LatLng(36.7115, 128.0134)} defaultZoom={7} defaultMapTypeId={navermaps.MapTypeId.NORMAL} ref={setMap}>
+                {CarpoolMarkerData.map((marker, index) => (
+                    <Marker
+                        key={index}
+                        position={{ lat: marker.latitude, lng: marker.longitude }}
+                        title={marker.name}
+                        icon={{
+                            url: CarMarker,
+                            size: new navermaps.Size(45, 45),
+                            scaledSize: new navermaps.Size(45, 45),
+                            origin: new navermaps.Point(0, 0),
+                            anchor: new navermaps.Point(20, 20),
+                        }}
+                        onClick={() => handleMarkerClick(marker)}
+                    />
+                ))}
+                {TaxiMarkerData.map((marker, index) => (
+                    <Marker
+                        key={index}
+                        position={{ lat: marker.latitude, lng: marker.longitude }}
+                        title={marker.name}
+                        icon={{
+                            url: TaxiMarker,
+                            size: new navermaps.Size(45, 45),
+                            scaledSize: new navermaps.Size(45, 45),
+                            origin: new navermaps.Point(0, 0),
+                            anchor: new navermaps.Point(20, 20),
+                        }}
+                        onClick={() => handleMarkerClick(marker)}
+                    />
+                ))}
+                <InfoWindow ref={setInfoWindow} />
+            </NaverMap>
+            {CarpoolWriting && <CarpoolWritingComponent />}
+            {TaxiWriting && <TaxiWritingComponent />}
+            {CarpoolUpdate && <CarpoolUpdateCom />}
+            {TaxiUpdate && <TaxiUpdateCom />}
+        </>
     );
 };
 
 export default MapComponent;
 
 const Container = styled.div`
-position: absolute;
-top: 10px;
-right: 10px;
-z-index: 1;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
 `;
 
 const CarpoolButton = styled.button`
-  background-color: #0583f2;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  margin-bottom: 5px;
-  font-weight: bold;
-  cursor: pointer;
+    background-color: #0583f2;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    cursor: pointer;
 `;
 
 const TaxiButton = styled.button`
-  background-color: yellow;
-  color: black;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-bottom: 5px;
-  font-weight: bold;
-  cursor: pointer;
+    background-color: yellow;
+    color: black;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    cursor: pointer;
 `;

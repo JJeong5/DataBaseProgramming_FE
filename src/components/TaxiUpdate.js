@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useResetRecoilState } from "recoil";
-import { TaxiWritingState } from "../atoms";
+import { useResetRecoilState, useRecoilState } from "recoil";
+import { TaxiUpdateState, pidState } from "../atoms";
 import axios from "axios";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const TaxiWritingComponent = () => {
-    const resetTaxiWriting = useResetRecoilState(TaxiWritingState);
+const TaxiUpdate = () => {
+    const resetTaxiUpdate = useResetRecoilState(TaxiUpdateState);
+    const [pid, setpid] = useRecoilState(pidState);
+
     const [taxiData, setTaxiData] = useState({
         type: "택시",
         startPoint: "",
@@ -20,13 +22,13 @@ const TaxiWritingComponent = () => {
     });
 
     const handleClose = () => {
-        resetTaxiWriting();
+        resetTaxiUpdate();
     };
 
-    const handleRegister = async () => {
+    const handleRegister = async (pid) => {
         // 등록 클릭시 서버로 내용을 보내야함
         try {
-            const response = await axios.post("http://localhost:8080/parties", {
+            const response = await axios.put(`http://localhost:8080/parties/${pid}`, {
                 type: "택시",
                 startPoint: taxiData.startPoint,
                 startLat: "37.86845655465745",
@@ -39,11 +41,11 @@ const TaxiWritingComponent = () => {
 
             if (response.status >= 200 && response.status < 300) {
                 // POST request was successful
-                console.log("POST request was successful");
+                console.log("PUT request was successful");
                 showPopupMessage();
             } else {
                 // POST request was not successful
-                console.log("POST request failed");
+                console.log("PUT request failed");
             }
         } catch (error) {
             console.log(error);
@@ -51,13 +53,13 @@ const TaxiWritingComponent = () => {
     };
 
     const showPopupMessage = () => {
-        toast.success('등록 되었습니다.');
+        toast.success('수정 되었습니다.');
       };
 
     return (
         <>
             <Container>
-                <Title>택시 글쓰기</Title> {/* Added title */}
+                <Title>택시 수정하기</Title> {/* Added title */}
                 <InputContainer>
                     <InputLabel>출발지</InputLabel>
                     <InputField
@@ -119,7 +121,7 @@ const TaxiWritingComponent = () => {
                     />
                 </InputContainer>
                 <ButtonContainer>
-                    <RegisterButton onClick={handleRegister}>등록</RegisterButton>
+                    <RegisterButton onClick={() => handleRegister(pid)}>등록</RegisterButton>
                     <CloseButton onClick={handleClose}>취소</CloseButton>
                 </ButtonContainer>
             </Container>
@@ -127,7 +129,7 @@ const TaxiWritingComponent = () => {
     );
 };
 
-export default TaxiWritingComponent;
+export default TaxiUpdate;
 
 const Container = styled.div`
     width: 50vw;

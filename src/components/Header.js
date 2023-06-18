@@ -24,7 +24,7 @@ const Header = () => {
         try {
             const response = await axios.get(`http://localhost:8080/parties`, {
                 params: {
-                    amount: 15,
+                    amount: 20,
                     type: "카풀",
                     keyword: "",
                 },
@@ -166,7 +166,7 @@ const StyledHeader = styled.header`
     margin: 0;
     font-family: "Noto Sans KR", sans-serif;
     border-bottom: 1px solid #ccc;
-    padding-bottom: 18px;
+    padding-bottom: 10px;
 `;
 
 const StyledNav = styled.nav`

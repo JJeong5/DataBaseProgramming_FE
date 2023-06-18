@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { useResetRecoilState } from "recoil";
-import { TaxiWritingState } from "../atoms";
+import { useResetRecoilState, useRecoilState } from "recoil";
+import { CarpoolUpdateState, pidState } from "../atoms";
 import axios from "axios";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const TaxiWritingComponent = () => {
-    const resetTaxiWriting = useResetRecoilState(TaxiWritingState);
-    const [taxiData, setTaxiData] = useState({
-        type: "택시",
+const CarpoolUpdate = () => {
+    const resetCarpoolUpdate = useResetRecoilState(CarpoolUpdateState);
+    const [pid, setpid] = useRecoilState(pidState);
+
+    const [carpoolData, setCarpoolData] = useState({
+        type: "카풀",
         startPoint: "",
         startLat: "37.86845655465745",
         startLng: "127.73665776796231",
@@ -20,30 +22,30 @@ const TaxiWritingComponent = () => {
     });
 
     const handleClose = () => {
-        resetTaxiWriting();
+        resetCarpoolUpdate();
     };
 
-    const handleRegister = async () => {
-        // 등록 클릭시 서버로 내용을 보내야함
+    const handleRegister = async (pid) => {
+
         try {
-            const response = await axios.post("http://localhost:8080/parties", {
-                type: "택시",
-                startPoint: taxiData.startPoint,
+            const response = await axios.put(`http://localhost:8080/parties/${pid}`, {
+                type: "카풀",
+                startPoint: carpoolData.startPoint,
                 startLat: "37.86845655465745",
                 startLng: "127.73665776796231",
-                endPoint: taxiData.endPoint,
-                totalHeadcnt: taxiData.totalHeadcnt,
-                startDate: taxiData.startDate,
-                startTime: taxiData.startTime,
+                endPoint: carpoolData.endPoint,
+                totalHeadcnt: carpoolData.totalHeadcnt,
+                startDate: carpoolData.startDate,
+                startTime: carpoolData.startTime,
             });
 
             if (response.status >= 200 && response.status < 300) {
                 // POST request was successful
-                console.log("POST request was successful");
+                console.log("PUT request was successful");
                 showPopupMessage();
             } else {
                 // POST request was not successful
-                console.log("POST request failed");
+                console.log("PUT request failed");
             }
         } catch (error) {
             console.log(error);
@@ -51,19 +53,23 @@ const TaxiWritingComponent = () => {
     };
 
     const showPopupMessage = () => {
-        toast.success('등록 되었습니다.');
+        toast.success('수정 되었습니다.');
       };
+
+    useEffect(() => {
+       
+    }, [carpoolData]);
 
     return (
         <>
             <Container>
-                <Title>택시 글쓰기</Title> {/* Added title */}
+                <Title>카풀 수정하기</Title> {/* Added title */}
                 <InputContainer>
                     <InputLabel>출발지</InputLabel>
                     <InputField
                         type="text"
                         onChange={(e) => {
-                            setTaxiData((prevState) => ({
+                            setCarpoolData((prevState) => ({
                                 ...prevState,
                                 startPoint: e.target.value,
                             }));
@@ -75,7 +81,7 @@ const TaxiWritingComponent = () => {
                     <InputField
                         type="text"
                         onChange={(e) => {
-                            setTaxiData((prevState) => ({
+                            setCarpoolData((prevState) => ({
                                 ...prevState,
                                 endPoint: e.target.value,
                             }));
@@ -87,9 +93,9 @@ const TaxiWritingComponent = () => {
                     <InputField
                         type="number"
                         onChange={(e) => {
-                            setTaxiData((prevState) => ({
+                            setCarpoolData((prevState) => ({
                                 ...prevState,
-                                totalHeadcnt: e.target.value,
+                                totalHeadcnt: parseInt(e.target.value, 10),
                             }));
                         }}
                     />
@@ -99,7 +105,7 @@ const TaxiWritingComponent = () => {
                     <InputField
                         type="date"
                         onChange={(e) => {
-                            setTaxiData((prevState) => ({
+                            setCarpoolData((prevState) => ({
                                 ...prevState,
                                 startDate: e.target.value,
                             }));
@@ -111,15 +117,26 @@ const TaxiWritingComponent = () => {
                     <InputField
                         type="time"
                         onChange={(e) => {
-                            setTaxiData((prevState) => ({
+                            setCarpoolData((prevState) => ({
                                 ...prevState,
                                 startTime: e.target.value,
                             }));
                         }}
                     />
                 </InputContainer>
+                <InputContainer>
+                    <InputLabel>글 내용</InputLabel>
+                    <TextareaField
+                        onChange={(e) => {
+                            setCarpoolData((prevState) => ({
+                                ...prevState,
+                                content: e.target.value,
+                            }));
+                        }}
+                    />
+                </InputContainer>
                 <ButtonContainer>
-                    <RegisterButton onClick={handleRegister}>등록</RegisterButton>
+                    <RegisterButton onClick={() => handleRegister(pid)}>등록</RegisterButton>
                     <CloseButton onClick={handleClose}>취소</CloseButton>
                 </ButtonContainer>
             </Container>
@@ -127,7 +144,7 @@ const TaxiWritingComponent = () => {
     );
 };
 
-export default TaxiWritingComponent;
+export default CarpoolUpdate;
 
 const Container = styled.div`
     width: 50vw;
@@ -165,6 +182,14 @@ const InputLabel = styled.label`
 const InputField = styled.input`
     width: 90%;
     height: 25px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 5px;
+`;
+
+const TextareaField = styled.textarea`
+    width: 90%;
+    height: 100px;
     border-radius: 5px;
     border: 1px solid #ccc;
     padding: 5px;
