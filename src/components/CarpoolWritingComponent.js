@@ -3,6 +3,8 @@ import styled from "styled-components";
 import { useResetRecoilState } from "recoil";
 import { CarpoolWritingState } from "../atoms";
 import axios from "axios";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const CarpoolWritingComponent = () => {
     const resetCarpoolWriting = useResetRecoilState(CarpoolWritingState);
@@ -75,7 +77,7 @@ const CarpoolWritingComponent = () => {
                 startLat: "37.86845655465745",
                 startLng: "127.73665776796231",
                 endPoint: carpoolData.endPoint,
-                totalHeadcnt: carpoolData.totalHead,
+                totalHeadcnt: carpoolData.totalHeadcnt,
                 startDate: carpoolData.startDate,
                 startTime: carpoolData.startTime,
                 carNumber: "98가7654",
@@ -85,6 +87,7 @@ const CarpoolWritingComponent = () => {
             if (response.status >= 200 && response.status < 300) {
                 // POST request was successful
                 console.log("POST request was successful");
+                showPopupMessage();
             } else {
                 // POST request was not successful
                 console.log("POST request failed");
@@ -93,6 +96,10 @@ const CarpoolWritingComponent = () => {
             console.log(error);
         }
     };
+
+    const showPopupMessage = () => {
+        toast.success('등록 되었습니다.');
+      };
 
     useEffect(() => {
         console.log(carpoolData);

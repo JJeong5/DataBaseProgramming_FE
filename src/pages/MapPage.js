@@ -5,6 +5,8 @@ import { carpoolDataState, taxiDataState, showCarpoolState, showTaxiState } from
 import { useRecoilValue } from "recoil";
 import ListComponent from "../components/ListComponent";
 import styled from "styled-components";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const MapPage = () => {
     const carpoolMarkerData = useRecoilValue(carpoolDataState);
@@ -16,6 +18,7 @@ const MapPage = () => {
                 <MapComponent CarpoolMarkerData={carpoolMarkerData} TaxiMarkerData={taxiMarkerData} />;
             </MapBox>
             <ListComponent />
+            <ToastContainer /> {/* Add this line */}
         </MainDiv>
     );
 };

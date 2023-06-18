@@ -5,8 +5,10 @@ import TaxiMarker from "../assets/icon/TaxiMarker_ver2.png";
 import UserMarker from "../assets/icon/UserMarker.png";
 import CarpoolWritingComponent from "./CarpoolWritingComponent";
 import TaxiWritingComponent from "./TaxiWritingComponent";
+import CarpoolUpdateCom from "./CarpoolUpdate";
+import TaxiUpdateCom from "./TaxiUpdate";
 import styled from "styled-components";
-import { showCarpoolState, showTaxiState, CarpoolWritingState, TaxiWritingState } from "../atoms";
+import { showCarpoolState, showTaxiState, CarpoolWritingState, TaxiWritingState, CarpoolUpdateState, TaxiUpdateState } from "../atoms";
 import { useRecoilValue, useRecoilState } from "recoil";
 
 const MapComponent = ({ CarpoolMarkerData, TaxiMarkerData }) => {
@@ -16,8 +18,11 @@ const MapComponent = ({ CarpoolMarkerData, TaxiMarkerData }) => {
     const [infowindow, setInfoWindow] = useState(null);
     const [CarpoolWriting, setCarpoolWriting] = useRecoilState(CarpoolWritingState);
     const [TaxiWriting, setTaxiWriting] = useRecoilState(TaxiWritingState);
+    const [CarpoolUpdate, setCarpoolUpdate] = useRecoilState(CarpoolUpdateState);
+    const [TaxiUpdate, setTaxiUpdate] = useRecoilState(TaxiUpdateState);
     const showCarpool = useRecoilValue(showCarpoolState);
     const showTaxi = useRecoilValue(showTaxiState);
+    
 
     function onSuccessGeolocation(position) {
         if (!map || !infowindow) return;
@@ -86,11 +91,15 @@ const MapComponent = ({ CarpoolMarkerData, TaxiMarkerData }) => {
     const handleCarpoolButtonClick = () => {
         setCarpoolWriting(true);
         setTaxiWriting(false);
+        setCarpoolUpdate(false);
+        setTaxiUpdate(false);
     };
 
     const handleTaxiButtonClick = () => {
         setCarpoolWriting(false);
         setTaxiWriting(true);
+        setCarpoolUpdate(false);
+        setTaxiUpdate(false);
     };
 
     return (
@@ -134,6 +143,8 @@ const MapComponent = ({ CarpoolMarkerData, TaxiMarkerData }) => {
             </NaverMap>
             {CarpoolWriting && <CarpoolWritingComponent />}
             {TaxiWriting && <TaxiWritingComponent />}
+            {CarpoolUpdate && <CarpoolUpdateCom />}
+            {TaxiUpdate && <TaxiUpdateCom />}
         </>
     );
 };

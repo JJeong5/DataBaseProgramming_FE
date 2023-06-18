@@ -24,7 +24,7 @@ const Header = () => {
         try {
             const response = await axios.get(`http://localhost:8080/parties`, {
                 params: {
-                    amount: 15,
+                    amount: 20,
                     type: "카풀",
                     keyword: "",
                 },

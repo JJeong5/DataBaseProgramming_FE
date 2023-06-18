@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { showCarpoolState, showTaxiState } from "../atoms";
-import { useRecoilValue } from "recoil";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import "intersection-observer";
 import axios from "axios";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { CarpoolUpdateState, TaxiUpdateState, pidState, CarpoolWritingState, TaxiWritingState } from "../atoms";
 
 // problem : 스크롤 바를 체크하는 target1, target이 서로 연동됨
 const ListComponent = () => {
@@ -14,11 +17,32 @@ const ListComponent = () => {
     const isCarpoolshow = useRecoilValue(showCarpoolState);
     const [tempId, setTempId] = useState(0);
     const [tempId1, setTempId1] = useState(0);
-
+    const setCarpoolUpdateState = useSetRecoilState(CarpoolUpdateState);
+    const setTaxiUpdateState = useSetRecoilState(TaxiUpdateState);
+    const setpidState = useSetRecoilState(pidState);
+    const setCarpoolWriting = useSetRecoilState(CarpoolWritingState);
+    const setTaxiWriting = useSetRecoilState(TaxiWritingState);
+    
     let carpoolId = -1;
     if (tempId !== 0) carpoolId = tempId;
     let taxiId = -1;
     if (tempId1 !== 0) taxiId = tempId1;
+
+    const handleCarpoolUpdate = (pid) => {
+        setCarpoolUpdateState(true);
+        setTaxiUpdateState(false);
+        setCarpoolWriting(false);
+        setTaxiWriting(false);
+        setpidState(pid);
+    };
+
+    const handleTaxiUpdate = (pid) => {
+        setTaxiUpdateState(true);
+        setCarpoolUpdateState(false);
+        setCarpoolWriting(false);
+        setTaxiWriting(false);
+        setpidState(pid);
+    };
 
     //useEffect에 의해 observer와 묶여서 매번 호출되는 문제 개선 필요
     const getInitialData = async () => {
@@ -44,6 +68,21 @@ const ListComponent = () => {
         if (taxiId === -1) taxiId = responseT.data[0].pid + 1;
     };
 
+    // Function to delete a party
+  const deleteParty = async (partyId) => {
+    try {
+      await axios.delete(`http://localhost:8080/parties/${partyId}`);
+      showPopupMessage();
+      // Handle successful deletion (e.g., remove the deleted party from the state)
+    } catch (error) {
+      // Handle error (e.g., show an error message)
+    }
+  };
+
+  const showPopupMessage = () => {
+    toast.success('삭제 되었습니다');
+  };
+
     const carpoolFetchData = async () => {
         const response = await axios.get(`http://localhost:8080/parties`, {
             params: {
@@ -58,7 +97,9 @@ const ListComponent = () => {
         console.log(data);
 
         setCarpoolItems((prev) => prev.concat(data));
+        if (data.length > 0) {
         carpoolId = data[data.length - 1].pid;
+        }
         // console.log(carpoolId, "카풀");
     };
 
@@ -92,7 +133,7 @@ const ListComponent = () => {
                 if (entry.isIntersecting) {
                     observer.unobserve(entry.target);
                     // carpoolId < 23
-                    if (carpoolId < 22 && carpoolId !== -1) {
+                    if (carpoolId < 2 && carpoolId !== -1) {
                         return () => observer && observer.disconnect();
                     }
                     await getInitialData();
@@ -154,7 +195,8 @@ const ListComponent = () => {
                                 <CurrentMember>
                                     {item.currentHeadcnt}/{item.totalHeadcnt} 명
                                 </CurrentMember>
-                                <CparpoolJoinButton>참여</CparpoolJoinButton>
+                                <CparpoolJoinButton onClick={() => handleCarpoolUpdate(item.pid)}>수정</CparpoolJoinButton>
+                                <CparpoolJoinButton onClick={() => deleteParty(item.pid)}>삭제</CparpoolJoinButton>
                             </ListCarItem>
                         );
                     })}
@@ -176,14 +218,14 @@ const ListComponent = () => {
                                 <CurrentMember>
                                     {item.currentHeadcnt}/{item.totalHeadcnt} 명
                                 </CurrentMember>
-                                <JoinButton>참여</JoinButton>
+                                <JoinButton onClick={() => handleTaxiUpdate(item.pid)}>수정</JoinButton>
+                                <JoinButton onClick={() => deleteParty(item.pid)}>삭제</JoinButton>
                             </ListTaxiItem>
                         );
                     })}
                     <div ref={setTarget1}>----</div>
                 </div>
             )}
-
             {/* <div ref={setTarget}>this is the target</div> */}
         </Main>
     );
@@ -274,7 +316,7 @@ const JoinButton = styled.button`
     border-radius: 10px;
     padding: 10px 10px;
     text-align: center;
-    margin-right: 18px;
+    margin-right: 1px;
     font-weight: bold;
     cursor: pointer; //마우스 포인터 변화
 
@@ -301,7 +343,7 @@ const CparpoolJoinButton = styled.button`
     border-radius: 10px;
     padding: 10px 10px;
     text-align: center;
-    margin-right: 18px;
+    margin-right: 1px;
     font-weight: bold;
     cursor: pointer; //마우스 포인터 변화
 
